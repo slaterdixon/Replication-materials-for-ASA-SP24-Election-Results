@@ -1,88 +1,9 @@
-library(vote)
-library(tidyverse)
+### Functions for plotting RCV results
+
+
 library(ggtext)
 library(ggthemes)
 library(kableExtra)
-
-all.results <- read_csv("./data/SP_24_ElectionResults.csv", skip = 1, show_col_types = FALSE) |>
-  # Remove rows for President/Secretary
-  select(!c(contains("Pres"), contains("Secr")))
-
-extract.columns <- function(name){
-  # Clean column names from RCV VikingCentral Election
-  # name (str): a column name containing a senate position and 
-  #             rank number, along with some other stuff
-  # -> column name (str): position and rank like "first_year_senator_1"
-  
-  
-  # If it's the ID column, rename to ID
-  if(name == "SubmissionId"){
-    return("id")
-  }
-  
-  # Extract RCV rank
-  rank <- name |> 
-    str_extract(pattern = "[- 0-9]{1}$") 
-  
-  # Extract senate name
-  name <- name |> 
-    
-    # Clean string bc I'm bad at regex
-    tolower() |> 
-    str_remove("-") |>
-    str_remove(" year") |>
-    str_replace_all(" ", "_") |>
-    
-    # Match "word senator"
-    str_extract(pattern = "[a-z]*[_]{0,1}(?:senator)")
-  
-  # Return "position_rank"
-  return(paste0(name, "_", rank))
-}
-
-
-# Set column names to extract.columns() on each name
-colnames(all.results) <- map(colnames(all.results), extract.columns)
-
-# Get list of positions in election
-positions <- colnames(all.results |> select(-id)) |>
-  # Remove rank and get unique positions
-  str_remove_all("[_][0-9]{1}") |>
-  unique() 
-
-# `vote::rcv()` wants RCV results to be Voter x Candidate where each 
-# row is a choice
-results.pivoted <- all.results |>
-  pivot_longer(-id) |>
-  filter(!is.na(value)) |>
-  # Create columns for race name and choice (rank)
-  mutate(choice = str_sub(name, start = -1),
-         name = str_sub(name, start = 1, end = -3))
-
-rcv.results <- function(every.result = results.pivoted, position = "large_senator", seats = 4){
-  # Get results for an individual race
-  # every.result (tbl): long df of all results with columns name, choice, id
-  # position (str): name of position
-  # -> rcv results (tbl)
-  
-  every.result |>
-    # Filter just the position and drop column 
-    filter(name == position) |>
-    select(-name) |>
-    
-    # Remove rows with missing choice and coerce to int
-    filter(!is.na(choice)) |>
-    mutate(choice = as.integer(choice)) |>
-    
-    # Pivot to form required by `vote::stv()` and drop id col
-    pivot_wider(id_cols = id, names_from = value, values_from = choice) |>
-    select(-id)  |>
-    vote::stv(nseats = seats, 
-              invalid.partial = TRUE,  
-              complete.ranking = FALSE,
-              quiet = T)
-}
-
 
 get_position_name <- function(cleaned.position.name){
   # Lookup vector for position names for plot title
@@ -138,7 +59,7 @@ get_results_plot <- function(rcv.results.to.plot, position = "large_senator", se
     select(stage, name) |>
     mutate(action = "Eliminated") 
   
-
+  
   
   incumbents <- read_csv("./data/senators23-24.csv", show_col_types = FALSE) |> pull(Name)
   
@@ -150,21 +71,33 @@ get_results_plot <- function(rcv.results.to.plot, position = "large_senator", se
     left_join(elected) |>
     left_join(eliminated, by = c("stage", "name")) |>
     
+    # Coalesce eliminated and elected actions
     mutate(color = coalesce(action.x, action.y)) |>
+    # For some candidates nothing happened in a particular round...
+    # ...action is "None" for those candidates 
     mutate(color = replace_na(color, "None"))  |>
+    
+    # Get the last name of each candidate
     mutate(name = str_replace(name, "Suyash SR", "Suyash-SR")) |>
     mutate(name.label = str_split_i(name, pattern = " ", i = 2)) |>
     
+    # For candidates who won, paste markdown bold tags around name
     mutate(name.label = case_when(
       name %in% elected$name ~ paste0("**", name.label, "**"),
       .default = name.label
     )) |>
-    
+    # For candidates who are incumbents, paste asterick by name
     mutate(name.label = case_when(
       (name %in% incumbents) ~ paste0(name.label, "&ast;"),
       .default = name.label
     )) 
-  elaborate.subtitle <- paste0(seats, " senators elected from ", no.candidates, " candidates over ", no.rounds, " instant runoff rounds")
+  
+  # Make subtitle string
+  # "x senators elected from y candidates over z instant runoff rounds"
+  elaborate.subtitle <- paste0(seats, 
+                               " senators elected from ", 
+                               no.candidates, " candidates over ", 
+                               no.rounds, " instant runoff rounds")
   
   stages.plot <- stages |>
     
@@ -184,7 +117,7 @@ get_results_plot <- function(rcv.results.to.plot, position = "large_senator", se
     labs(
       x = "Name",
       y = "Votes",
-      fill = "",
+      fill = "Action",
       title = get_position_name(position),
       subtitle = elaborate.subtitle,
       caption = "*&ast;Incumbent*"
@@ -199,12 +132,14 @@ get_results_plot <- function(rcv.results.to.plot, position = "large_senator", se
           strip.text.x = element_text(
             size = 10, color = "#404040", face = "italic"
           )) 
-
+  
   return(stages.plot)
   
 }
 
 get_results_table <- function(results.df){
+  ### Table of winner results in order of when they won 
+  
   tibble(Candidate = results.df$elected) |>
     rowid_to_column("Elected") |>
     kbl(booktabs = T) |>
@@ -212,16 +147,22 @@ get_results_table <- function(results.df){
 }
 
 rank_distribution_plot <- function(results.df, position = "large_senator", bold.winners = T){
+  ### A distribution plot showing how many of each RCV choice a candidate got
+  
   results.df$data |>
     as_tibble() |>
     pivot_longer(everything()) |>
+    # If we're bolding winners' names, paste markdown bold tags around name
     mutate(name = if_else((name %in% results.df$elected) & bold.winners, paste0("**", name, "**"), name)) |>
     filter(value != 0) |>
+    
+    # Make the choice distribution plot
     ggplot() +
     geom_bar(aes(x = value, fill = name), color = "black", linewidth = .24) +
     facet_wrap(vars(name), strip.position="bottom") +
     theme_tufte() +
     scale_fill_manual(values =  c("#D87CAC", "#009FB7", "#e54e21ff", "#6c8645ff", "#273046ff", "#ffbd00ff", "#9e0059ff")) +
+    # Plot every choice on the x axis, no skips
     scale_x_continuous(breaks = seq.int(1, length(colnames(results.df$data)), by = 1)) +
     labs(
       title = get_position_name(position),
@@ -232,10 +173,10 @@ rank_distribution_plot <- function(results.df, position = "large_senator", bold.
     ) +
     theme(plot.title = element_text(hjust = 0.5, face = "bold"),
           plot.subtitle = element_text(hjust = 0.5),
-          axis.text.y = ggtext::element_markdown(lineheight = .25),
-          plot.caption = ggtext::element_markdown(),
+          axis.text.y = element_markdown(lineheight = .25),
+          plot.caption = element_markdown(),
+          strip.text.x = element_markdown(),
           legend.position = "none")
-  
 }
 
 

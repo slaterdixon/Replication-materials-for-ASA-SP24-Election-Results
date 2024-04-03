@@ -17,7 +17,10 @@ Per the ASA Constitution and Election Code, 2024 Spring Elections were conducted
 
 ```{r setup}
 
-source("sp_24_tabulate.R")
+source("tabulate_results.R")
+source("plot_results.R")
+
+
 ```
 
 ## President/Vice President
@@ -34,7 +37,7 @@ Carson Steichen was elected Secretary by default.
 
 ```{r}
 
-at.large.results <- rcv.results()
+at.large.results <- rcv_results()
 
 
 get_results_table(at.large.results)
@@ -59,7 +62,7 @@ at.large.results |>
 ### Results
 
 ```{r}
-second.year.results <- rcv.results(position = "second_senator")
+second.year.results <- rcv_results(position = "second_senator")
 
 get_results_table(second.year.results)
 ```
@@ -83,7 +86,7 @@ at.large.results |>
 
 ```{r}
 
-third.year.results <- rcv.results(position = "third_senator")
+third.year.results <- rcv_results(position = "third_senator")
 
 get_results_table(third.year.results)
 ```
@@ -107,7 +110,7 @@ at.large.results |>
 
 ```{r}
 
-international.results <- rcv.results(position = "international_senator", seats = 2)
+international.results <- rcv_results(position = "international_senator", seats = 2)
 
 get_results_table(international.results)
 ```
@@ -139,7 +142,7 @@ The following candidates were elected by default:
 
     ```{r}
 
-    fourth.year.results <- rcv.results(position = "fourth_senator", seats = 3)
+    fourth.year.results <- rcv_results(position = "fourth_senator", seats = 3)
 
     candidates <- colnames(fourth.year.results$data)
     winners <- fourth.year.results$elected
@@ -147,13 +150,12 @@ The following candidates were elected by default:
 
     ordered <- c(
       candidates, 
-      winners[which(!fourth.year.candidates %in% fourth.year.winners)]
+      winners[which(!candidates %in% winners)]
     )
 
 
     fourth.year.results |>
-      rank_distribution_plot(position = "fourth_senator", bold.winners = F) +
-      scale_x_continous()
+      rank_distribution_plot(position = "fourth_senator", bold.winners = F)
 
     ```
 
@@ -229,7 +231,7 @@ read_csv("./data/asa_historical_turnout.csv") |>
   ggplot() +
   geom_bar(aes(x = `Election Year`, y = `value`, fill = name), stat = "identity", position = "fill")  +
   scale_fill_manual(values = c("Did Not Vote"  = "#273046", "No Data" = "#404040", "Voted" = "#E54E21")) +
-    coord_flip() +
+   # coord_flip() +
   labs(
     title = "ASA Spring Elections Historical Turnout",
     x = "Race",

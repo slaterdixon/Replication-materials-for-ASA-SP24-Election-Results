@@ -1,35 +1,4 @@
 {
-    "sources": [
-        {
-            "URL": "https://cran.r-project.org/web/packages/vote/index.html",
-            "author": [
-                {
-                    "family": "Sevcikova",
-                    "given": "Hana"
-                },
-                {
-                    "family": "Silverman",
-                    "given": "Bernard"
-                },
-                {
-                    "family": "Raftery",
-                    "given": "Adrian"
-                }
-            ],
-            "id": "sevcikova2023",
-            "issued": {
-                "date-parts": [
-                    [
-                        2023,
-                        12,
-                        10
-                    ]
-                ]
-            },
-            "title": "Vote: Election vote counting",
-            "title-short": "Vote",
-            "type": "book"
-        }
-    ],
+    "sources": [],
     "project_biblios": []
 }

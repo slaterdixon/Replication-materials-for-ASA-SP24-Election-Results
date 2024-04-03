@@ -2,8 +2,8 @@
     "sortOrder": [
         {
             "columnIndex": 2,
-            "ascending": true
+            "ascending": false
         }
     ],
-    "path": "~/Documents/Data Science Projects/ASA Spring 2024 Results"
+    "path": "~/Documents/Data Science Projects/Replication-materials-for-ASA-SP24-Election-Results"
 }
