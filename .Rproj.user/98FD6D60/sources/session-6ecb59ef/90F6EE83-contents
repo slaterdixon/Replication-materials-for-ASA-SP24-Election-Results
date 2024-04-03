@@ -1,3 +1,0 @@
-# Replication materials for ASA Spring 2024 RCV Elections
-
-In March 2024, the Augustana Student Association conducted its spring elections using Viking Central (CampusLabs/Anthology). For the second year, ballots were cast using Ranked Choice Vote. This repository contains all materials necessary to replicate the final results, including the raw results and computations in R using the `vote` package. 
