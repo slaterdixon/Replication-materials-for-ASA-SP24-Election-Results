@@ -1,4 +1,0 @@
-"0",""
-"0","international.results <- rcv.results(position = ""international_senator"", seats = 2)"
-"0",""
-"0","get_results_table(international.results)"
