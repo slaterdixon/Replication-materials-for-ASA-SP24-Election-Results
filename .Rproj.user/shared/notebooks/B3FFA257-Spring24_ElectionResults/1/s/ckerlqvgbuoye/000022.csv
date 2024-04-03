@@ -1,0 +1,3 @@
+"0","second.year.results <- rcv.results(position = ""second_senator"")"
+"0",""
+"0","get_results_table(second.year.results)"

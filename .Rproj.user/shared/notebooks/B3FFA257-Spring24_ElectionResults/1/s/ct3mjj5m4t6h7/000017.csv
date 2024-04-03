@@ -1,0 +1,4 @@
+"0",""
+"0","get_results_plot(third.year.results, position = ""third_senator"") |> print()"
+"2","Joining with `by = join_by(stage)`"
+"2","Joining with `by = join_by(stage, name)`"
