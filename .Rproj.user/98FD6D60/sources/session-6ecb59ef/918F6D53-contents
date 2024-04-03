@@ -161,7 +161,7 @@ The following candidates were elected by default:
 
 ```{r}
 
-turnout.df <- read_csv("sp24_turnout_results.csv", col_select = c("Race", "Votes", "Eligible")) |> 
+turnout.df <- read_csv("./data/sp24_turnout_results.csv", col_select = c("Race", "Votes", "Eligible")) |> 
   head(7) |>
   mutate(across(c(Votes, Eligible), ~as.integer(.))) 
 
@@ -216,7 +216,7 @@ turnout.df |>
 
 library(janitor)
 
-read_csv("asa_historical_turnout.csv") |>
+read_csv("./data/asa_historical_turnout.csv") |>
   head(8) |>
   mutate(`Competitive President?` = if_else(as.logical(`Competitive President?`), "", "*"),
          `Election Year` = paste0(`Election Year`, `Competitive President?`)) |>

@@ -4,7 +4,7 @@ library(ggtext)
 library(ggthemes)
 library(kableExtra)
 
-all.results <- read_csv("SP_24_ElectionResults.csv", skip = 1, show_col_types = FALSE) |>
+all.results <- read_csv("./data/SP_24_ElectionResults.csv", skip = 1, show_col_types = FALSE) |>
   # Remove rows for President/Secretary
   select(!c(contains("Pres"), contains("Secr")))
 
@@ -140,7 +140,7 @@ get_results_plot <- function(rcv.results.to.plot, position = "large_senator", se
   
 
   
-  incumbents <- read_csv("senators23-24.csv", show_col_types = FALSE) |> pull(Name)
+  incumbents <- read_csv("./data/senators23-24.csv", show_col_types = FALSE) |> pull(Name)
   
   
   # Plot the results
