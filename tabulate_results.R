@@ -1,9 +1,8 @@
 library(vote)
 library(tidyverse)
-
-
 source("clean_raw_results.R")
 
+# Get cleaned results
 all.results <- clean_raw_results()
 
 # `vote::rcv()` wants RCV results to be Voter x Candidate where each 
@@ -19,6 +18,7 @@ rcv_results <- function(every.result = results.pivoted, position = "large_senato
   # Get results for an individual race
   # every.result (tbl): long df of all results with columns name, choice, id
   # position (str): name of position
+  # seats (int): number of seats elected in race
   # -> rcv results (tbl)
   
   every.result |>

@@ -226,7 +226,7 @@ read_csv("./data/asa_historical_turnout.csv") |>
   rename(Voted = `Votes Cast`) |>
   mutate(`Did Not Vote` =  `Total Fall Undergraduate Enrollment` - Voted) |>
   select(-`Total Fall Undergraduate Enrollment`) |>
-  pivot_longer(-`Election Year`) |>
+  pivot_longer(-`Election Year`) |>d
   arrange(desc(`Election Year`)) |>
   ggplot() +
   geom_bar(aes(x = `Election Year`, y = `value`, fill = name), stat = "identity", position = "fill")  +
